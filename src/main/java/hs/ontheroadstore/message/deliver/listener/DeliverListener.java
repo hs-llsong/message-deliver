@@ -25,8 +25,11 @@ public class DeliverListener implements MessageListener{
 
     @Override
     public Action consume(Message message, ConsumeContext context) {
-        //app.getHandleManager().getWxTemplateMessageHandler().send();
         String msgData = new String(message.getBody());
+        if (StringUtil.isNullOrEmpty(msgData)) {
+            logger.error("Empty message:" + new Gson().toJson(message));
+            return Action.CommitMessage;
+        }
         return doWxTemplateMessage(msgData);
     }
     private Action doWxTemplateMessage(String message) {
@@ -51,6 +54,10 @@ public class DeliverListener implements MessageListener{
             WxTemplateMessage wxTemplateMessage = new Gson().fromJson(message,WxTemplateMessage.class);
             WxTemplateMessageResponse wxTemplateMessageResponse =
                     app.getHandleManager().getWxTemplateMessageHandler().send(wxTemplateMessage,accessToken);
+            if (wxTemplateMessageResponse == null) {
+                logger.info("Reconsume later");
+                return Action.ReconsumeLater;
+            }
             if (wxTemplateMessageResponse.getErrcode()!=0) {
                 logger.error("Error code:" + wxTemplateMessageResponse.getErrcode());
                 switch (wxTemplateMessageResponse.getErrcode()) {
@@ -62,6 +69,7 @@ public class DeliverListener implements MessageListener{
                         logger.error("Reconsume later.Send message failed." + wxTemplateMessageResponse.getErrmsg());
                         return Action.ReconsumeLater;
                     case 40001:
+                        app.getHandleManager().getWxTokenHandler().refreshToken();
                         logger.error("Reconsume later.Send message 40001 error." + wxTemplateMessageResponse.getErrmsg());
                         return Action.ReconsumeLater;
                     default:

@@ -17,8 +17,7 @@ public class HsHttpClient {
     private final Logger logger = Logger.getLogger(HsHttpClient.class);
 
     public HsHttpClient() {
-        OkHttpClient.Builder okHttpBuiler = new OkHttpClient.Builder();
-        this.okHttpClient = okHttpBuiler.build();
+        this.okHttpClient = new OkHttpClient();
     }
 
     public HsHttpClient(boolean isHsApiAuthorize,String appkey,String appSecret) {
