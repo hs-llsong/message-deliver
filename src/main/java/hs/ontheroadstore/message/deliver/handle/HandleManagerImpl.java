@@ -14,4 +14,14 @@ public class HandleManagerImpl implements HandleManager {
     public void registerWxTemplateMessageHandler(WxTemplateMessageHandler handler) {
         this.wxTemplateMessageHandler = handler;
     }
+
+    @Override
+    public WxTokenHandler getWxTokenHandler() {
+        return null;
+    }
+
+    @Override
+    public void registerWxTokenHandler(WxTokenHandler handler) {
+
+    }
 }
