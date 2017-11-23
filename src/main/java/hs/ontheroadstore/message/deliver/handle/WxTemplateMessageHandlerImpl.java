@@ -3,7 +3,8 @@ package hs.ontheroadstore.message.deliver.handle;
 import com.aliyun.openservices.shade.io.netty.util.internal.StringUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import hs.ontheroadstore.message.deliver.bean.WxTemplateMessage;
+import com.google.gson.JsonSyntaxException;
+import hs.ontheroadstore.message.deliver.bean.WeixinMessageTemplate;
 import hs.ontheroadstore.message.deliver.bean.WxTemplateMessageResponse;
 import hs.ontheroadstore.message.deliver.tools.HsHttpClient;
 import org.apache.log4j.Logger;
@@ -18,7 +19,7 @@ public class WxTemplateMessageHandlerImpl implements WxTemplateMessageHandler {
     private final Logger logger = Logger.getLogger(WxTemplateMessageHandlerImpl.class);
 
     @Override
-    public WxTemplateMessageResponse send(WxTemplateMessage message, String accessToken) {
+    public WxTemplateMessageResponse send(WeixinMessageTemplate message, String accessToken) {
         HsHttpClient hsHttpClient = new HsHttpClient();
         Gson gson = new GsonBuilder().create();
         String jsonBody = gson.toJson(message);
@@ -36,6 +37,16 @@ public class WxTemplateMessageHandlerImpl implements WxTemplateMessageHandler {
             logger.error("Weixin template send response null");
             return null;
         }
-        return gson.fromJson(responseBody,WxTemplateMessageResponse.class);
+        WxTemplateMessageResponse response;
+        try {
+            response = gson.fromJson(responseBody,WxTemplateMessageResponse.class);
+        } catch (JsonSyntaxException e) {
+            logger.error(e.getMessage());
+            return null;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return null;
+        }
+        return response;
     }
 }

@@ -5,7 +5,9 @@ package hs.ontheroadstore.message.deliver.handle;
  */
 public interface HandleManager {
     WxTemplateMessageHandler getWxTemplateMessageHandler();
-    void registerWxTemplateMessageHandler(WxTemplateMessageHandler handler);
     WxTokenHandler getWxTokenHandler();
+    void registerWxTemplateMessageHandler(WxTemplateMessageHandler handler);
     void registerWxTokenHandler(WxTokenHandler handler);
+    void registerWxMessageMakeupHandler(WxMessageMakeupHandle handle);
+    WxMessageMakeupHandle getWxMessageMakeupHandler();
 }

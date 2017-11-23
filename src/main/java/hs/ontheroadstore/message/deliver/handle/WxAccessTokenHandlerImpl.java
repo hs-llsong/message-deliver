@@ -15,7 +15,7 @@ import java.util.Map;
 /**
  * Created by Jeffrey(zuoyaofei@icloud.com) on 17/11/22.
  */
-public class WxAccessTokenHandlerImpl implements WxTokenHandler,Runnable {
+public class WxAccessTokenHandlerImpl implements WxTokenHandler{
     static final String WEIXIN_TOKEN_URL = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential";
     private String appId;
     private String appSecret;
@@ -23,9 +23,18 @@ public class WxAccessTokenHandlerImpl implements WxTokenHandler,Runnable {
     private final Logger logger = Logger.getLogger(WxAccessTokenHandlerImpl.class);
     private HsHttpClient hsHttpClient;
     private boolean refreshTokenImmediately = false;
+    private volatile boolean stop = false;
+
+
     public WxAccessTokenHandlerImpl(String appId, String appSecret) {
         this.appId = appId;
         this.appSecret = appSecret;
+    }
+
+    @Override
+    public void terminate() {
+        stop = true;
+        refreshTokenImmediately = true;
     }
 
     @Override
@@ -41,7 +50,7 @@ public class WxAccessTokenHandlerImpl implements WxTokenHandler,Runnable {
 
     @Override
     public void run() {
-        while (true) {
+        while (!stop) {
             if(wxAccessToken != null ) {
                 while (wxAccessToken.expiresIn>30 && !refreshTokenImmediately) {
                     try {
@@ -53,6 +62,7 @@ public class WxAccessTokenHandlerImpl implements WxTokenHandler,Runnable {
                     }
                     wxAccessToken.expiresIn--;
                 }
+                if(stop) continue;
             }
             wxAccessToken = refreshAccessToken();
             if(refreshTokenImmediately) refreshTokenImmediately=false;

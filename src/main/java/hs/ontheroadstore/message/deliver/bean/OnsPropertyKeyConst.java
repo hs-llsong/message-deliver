@@ -22,4 +22,6 @@ public class OnsPropertyKeyConst {
      * SecretKey, 用于标识、校验用户身份
      */
     public static final String SecretKey = "SecretKey";
+
+    public static final String Topic = "Topic";
 }
