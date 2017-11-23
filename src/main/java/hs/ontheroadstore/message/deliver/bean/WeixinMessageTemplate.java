@@ -20,6 +20,12 @@ public class WeixinMessageTemplate implements Serializable {
         private String value;
         private String color;
 
+        public Element(String name, String value, String color) {
+            this.name = name;
+            this.value = value;
+            this.color = color;
+        }
+
         public String getName() {
             return name;
         }
@@ -43,6 +49,10 @@ public class WeixinMessageTemplate implements Serializable {
         public void setColor(String color) {
             this.color = color;
         }
+    }
+
+    public void addElement(String name,String value,String color) {
+        this.datas.add(new Element(name,value,color));
     }
 
     public String getToUser() {

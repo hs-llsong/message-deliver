@@ -43,6 +43,7 @@ public class App {
         }
         app.setHandleManager(new HandleManagerImpl());
         app.getHandleManager().registerWxTemplateMessageHandler(new WxTemplateMessageHandlerImpl());
+        app.getHandleManager().registerWxMessageMakeupHandler(new WxMessageMakeupHandleImpl(prop));
         WxTokenHandler tokenHandler = new WxAccessTokenHandlerImpl(appid,appSecret);
         Thread t = new Thread(tokenHandler);
         t.start();
@@ -64,13 +65,13 @@ public class App {
         logger.info("Notification consumer service started");
     }
 
-    private Consumer createConsumer(Properties properties,String channelName,String subExpression) {
+    private Consumer createConsumer(final Properties properties,String channelName,String subExpression) {
         Properties prop = this.getChannelProperties(properties,channelName);
         if(prop.isEmpty()) {
             logger.error("Can't load properites for "+channelName);
             return null;
         }
-        Consumer consumer = null;
+        Consumer consumer;
         try {
             consumer = ONSFactory.createConsumer(prop);
             consumer.subscribe(prop.getProperty(OnsPropertyKeyConst.Topic), subExpression, new DeliverListener(this));

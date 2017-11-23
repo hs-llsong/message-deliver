@@ -5,6 +5,8 @@ package hs.ontheroadstore.message.deliver.handle;
  */
 public class HandleManagerImpl implements HandleManager {
     private WxTemplateMessageHandler wxTemplateMessageHandler;
+    private WxTokenHandler wxTokenHandler;
+    private WxMessageMakeupHandle wxMessageMakeupHandle;
     @Override
     public WxTemplateMessageHandler getWxTemplateMessageHandler() {
         return this.wxTemplateMessageHandler;
@@ -17,11 +19,21 @@ public class HandleManagerImpl implements HandleManager {
 
     @Override
     public WxTokenHandler getWxTokenHandler() {
-        return null;
+        return this.wxTokenHandler;
     }
 
     @Override
     public void registerWxTokenHandler(WxTokenHandler handler) {
+        this.wxTokenHandler = handler;
+    }
 
+    @Override
+    public void registerWxMessageMakeupHandler(WxMessageMakeupHandle handle) {
+        this.wxMessageMakeupHandle = handle;
+    }
+
+    @Override
+    public WxMessageMakeupHandle getWxMessageMakeupHandler() {
+        return this.wxMessageMakeupHandle;
     }
 }
