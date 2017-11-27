@@ -23,6 +23,7 @@ public class WxTemplateMessageHandlerImpl implements WxTemplateMessageHandler {
         HsHttpClient hsHttpClient = new HsHttpClient();
         Gson gson = new GsonBuilder().create();
         String jsonBody = gson.toJson(message);
+        logger.debug("Request json body:" + jsonBody);
         String responseBody;
         try {
             responseBody = hsHttpClient.postJson(WEIXIN_TEMPLATE_MESSAGE_URL + accessToken,jsonBody);
@@ -37,6 +38,7 @@ public class WxTemplateMessageHandlerImpl implements WxTemplateMessageHandler {
             logger.error("Weixin template send response null");
             return null;
         }
+        logger.debug("Response body:" + responseBody);
         WxTemplateMessageResponse response;
         try {
             response = gson.fromJson(responseBody,WxTemplateMessageResponse.class);

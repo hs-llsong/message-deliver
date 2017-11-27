@@ -7,6 +7,8 @@ public class HandleManagerImpl implements HandleManager {
     private WxTemplateMessageHandler wxTemplateMessageHandler;
     private WxTokenHandler wxTokenHandler;
     private WxMessageMakeupHandle wxMessageMakeupHandle;
+    private JsonCacheHandler jsonCacheHandler;
+    private JedisPoolHandler jedisPoolHandler;
     @Override
     public WxTemplateMessageHandler getWxTemplateMessageHandler() {
         return this.wxTemplateMessageHandler;
@@ -35,5 +37,25 @@ public class HandleManagerImpl implements HandleManager {
     @Override
     public WxMessageMakeupHandle getWxMessageMakeupHandler() {
         return this.wxMessageMakeupHandle;
+    }
+
+    @Override
+    public JedisPoolHandler getJedisPoolHandler() {
+        return this.jedisPoolHandler;
+    }
+
+    @Override
+    public JsonCacheHandler getJsonCacheHandler() {
+        return this.jsonCacheHandler;
+    }
+
+    @Override
+    public void registerJedisPoolHandler(JedisPoolHandler handler) {
+        this.jedisPoolHandler = handler;
+    }
+
+    @Override
+    public void registerJsonCacheHandler(JsonCacheHandler handler) {
+        this.jsonCacheHandler = handler;
     }
 }

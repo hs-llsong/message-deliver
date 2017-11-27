@@ -6,8 +6,13 @@ package hs.ontheroadstore.message.deliver.handle;
 public interface HandleManager {
     WxTemplateMessageHandler getWxTemplateMessageHandler();
     WxTokenHandler getWxTokenHandler();
+    WxMessageMakeupHandle getWxMessageMakeupHandler();
+    JedisPoolHandler getJedisPoolHandler();
+    JsonCacheHandler getJsonCacheHandler();
     void registerWxTemplateMessageHandler(WxTemplateMessageHandler handler);
     void registerWxTokenHandler(WxTokenHandler handler);
     void registerWxMessageMakeupHandler(WxMessageMakeupHandle handle);
-    WxMessageMakeupHandle getWxMessageMakeupHandler();
+    void registerJedisPoolHandler(JedisPoolHandler handler);
+    void registerJsonCacheHandler(JsonCacheHandler handler);
+
 }

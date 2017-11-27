@@ -41,10 +41,27 @@ public class App {
             System.out.println("Weixin appid or secret not set.");
             System.exit(0);
         }
+        String redis_host,redis_auth,redis_sport,redis_token_key,redis_heishi_message_cache_key;
+        int redis_port = 6379;
+        redis_host = prop.getProperty(AppPropertyKeyConst.REDIS_HOST_KEY);
+        redis_auth = prop.getProperty(AppPropertyKeyConst.REDIS_AUTH);
+        redis_sport = prop.getProperty(AppPropertyKeyConst.REDIS_PORT_KEY);
+        redis_token_key = prop.getProperty(AppPropertyKeyConst.REDIS_TOKEN_KEY);
+        redis_heishi_message_cache_key = prop.getProperty(AppPropertyKeyConst.REDIS_HEISHI_MESSAGE_CACHE_KEY);
+        if (StringUtil.isNullOrEmpty(redis_host)) {
+            System.out.println("Redis host must be set.");
+            System.exit(0);
+        }
+        if (!StringUtil.isNullOrEmpty(redis_sport)) {
+            redis_port = Integer.valueOf(redis_sport);
+        }
+        JedisPoolHandler jedisPoolHandler = new JedisPoolHandler(redis_host,redis_port,redis_auth,3000);
         app.setHandleManager(new HandleManagerImpl());
+        app.getHandleManager().registerJedisPoolHandler(jedisPoolHandler);
         app.getHandleManager().registerWxTemplateMessageHandler(new WxTemplateMessageHandlerImpl());
         app.getHandleManager().registerWxMessageMakeupHandler(new WxMessageMakeupHandleImpl(prop));
-        WxTokenHandler tokenHandler = new WxAccessTokenHandlerImpl(appid,appSecret);
+        app.getHandleManager().registerJsonCacheHandler(new RedisCacheHandlerImpl(jedisPoolHandler,redis_heishi_message_cache_key));
+        WxTokenHandler tokenHandler = new WxAccessTokenHandlerImpl(appid,appSecret,jedisPoolHandler,redis_token_key);
         Thread t = new Thread(tokenHandler);
         t.start();
         logger.info("WxAccessTokenHandler service started");

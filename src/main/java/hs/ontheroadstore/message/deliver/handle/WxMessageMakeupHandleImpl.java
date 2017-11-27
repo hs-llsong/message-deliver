@@ -6,6 +6,8 @@ import hs.ontheroadstore.message.deliver.bean.WeixinMessageTemplate;
 import hs.ontheroadstore.message.deliver.bean.WxMessageStyle;
 import hs.ontheroadstore.message.deliver.bean.WxTemplateMessage;
 import org.apache.log4j.Logger;
+
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -14,7 +16,7 @@ import java.util.Properties;
  * Created by Jeffrey(zuoyaofei@icloud.com) on 17/11/23.
  */
 public class WxMessageMakeupHandleImpl implements WxMessageMakeupHandle{
-    private Map<String,WxMessageStyle> messageStyleMap;
+    private Map<String,WxMessageStyle> messageStyleMap = new HashMap<>();
     private Properties prop;
     private final Logger logger = Logger.getLogger(WxMessageMakeupHandleImpl.class);
     public WxMessageMakeupHandleImpl(final Properties prop) {
@@ -25,7 +27,9 @@ public class WxMessageMakeupHandleImpl implements WxMessageMakeupHandle{
         if(!this.messageStyleMap.isEmpty()) {
             if(this.messageStyleMap.containsKey(styleName)) return messageStyleMap.get(styleName);
         }
-        if(this.prop.isEmpty()) return null;
+        if(this.prop.isEmpty()) {
+            return null;
+        }
         String upcaseStyleName = styleName.toUpperCase();
         String color = this.prop.getProperty(AppPropertyKeyConst.COLOR_KEY + upcaseStyleName);
         String templateId = this.prop.getProperty(AppPropertyKeyConst.TEMPLATEID_KEY + upcaseStyleName);
@@ -52,6 +56,10 @@ public class WxMessageMakeupHandleImpl implements WxMessageMakeupHandle{
             logger.error("Message style configure not found.");
             return null;
         }
+        if(message.getMsgData()==null || message.getMsgData().isEmpty()) {
+            logger.error("Message data body is null.");
+            return null;
+        }
         WeixinMessageTemplate messageTemplate = new WeixinMessageTemplate();
         messageTemplate.setToUser(message.getToUser());
         messageTemplate.setTemplateId(messageStyle.getTemplateId());
@@ -64,7 +72,9 @@ public class WxMessageMakeupHandleImpl implements WxMessageMakeupHandle{
         Iterator<Map<String,String>> msgIt = message.getMsgData().iterator();
         while (msgIt.hasNext()) {
             Map<String,String> el = msgIt.next();
-            if (el.get("name") == null) continue;
+            if (el.get("name") == null) {
+                continue;
+            }
             messageTemplate.addElement(el.get("name"),el.get("value"),messageStyle.getColor());
         }
         return messageTemplate;

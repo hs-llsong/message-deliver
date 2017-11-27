@@ -23,10 +23,10 @@ public class DeliverListener implements MessageListener{
     public DeliverListener(final App app) {
         this.app = app;
     }
-
     @Override
     public Action consume(Message message, ConsumeContext context) {
         String msgData = new String(message.getBody());
+        logger.debug("consume message:" + msgData);
         if (StringUtil.isNullOrEmpty(msgData)) {
             logger.error("Empty message:" + new Gson().toJson(message));
             return Action.CommitMessage;
@@ -34,6 +34,7 @@ public class DeliverListener implements MessageListener{
         return doWxTemplateMessage(msgData);
     }
     private Action doWxTemplateMessage(String message) {
+
         if(app.getHandleManager() == null) {
             logger.error("Handler manager is null.");
             return Action.ReconsumeLater;
@@ -55,12 +56,25 @@ public class DeliverListener implements MessageListener{
             logger.error("WxAccessToken is null.");
             return Action.ReconsumeLater;
         }
+
         WeixinMessageTemplate weixinMessageTemplate;
         try {
             WxTemplateMessage wxTemplateMessage = new Gson().fromJson(message, WxTemplateMessage.class);
+            if(wxTemplateMessage == null) {
+                logger.error("WxTemplateMessage is null.message style error!" + message);
+                return Action.CommitMessage;
+            }
             weixinMessageTemplate = app.getHandleManager().getWxMessageMakeupHandler().disguise(wxTemplateMessage);
+
         } catch (JsonSyntaxException e) {
             logger.error(e.getMessage() + ",message:" + message);
+            return Action.CommitMessage;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return Action.CommitMessage;
+        }
+        if (weixinMessageTemplate == null) {
+            logger.error("WeixinMessageTemplate is null.");
             return Action.CommitMessage;
         }
 
@@ -70,6 +84,7 @@ public class DeliverListener implements MessageListener{
             logger.info("Send weixin template message response null,Reconsume later");
             return Action.ReconsumeLater;
         }
+        logger.debug("Send message finished. response:" + new Gson().toJson(wxTemplateMessageResponse));
         if (wxTemplateMessageResponse.getErrcode()!=0) {
             logger.error("Error code:" + wxTemplateMessageResponse.getErrcode());
             switch (wxTemplateMessageResponse.getErrcode()) {

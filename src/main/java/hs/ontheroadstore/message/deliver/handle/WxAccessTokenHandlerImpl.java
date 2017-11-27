@@ -4,8 +4,10 @@ import com.aliyun.openservices.shade.io.netty.util.internal.StringUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.annotations.SerializedName;
 import hs.ontheroadstore.message.deliver.tools.HsHttpClient;
 import org.apache.log4j.Logger;
+import redis.clients.jedis.Jedis;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -24,11 +26,13 @@ public class WxAccessTokenHandlerImpl implements WxTokenHandler{
     private HsHttpClient hsHttpClient;
     private boolean refreshTokenImmediately = false;
     private volatile boolean stop = false;
-
-
-    public WxAccessTokenHandlerImpl(String appId, String appSecret) {
+    private JedisPoolHandler jedisPoolHandler;
+    private String redisTokenKey;
+    public WxAccessTokenHandlerImpl(String appId, String appSecret,JedisPoolHandler jedisPoolHandler,String redisTokenKey) {
         this.appId = appId;
         this.appSecret = appSecret;
+        this.jedisPoolHandler = jedisPoolHandler;
+        this.redisTokenKey = redisTokenKey;
     }
 
     @Override
@@ -52,7 +56,7 @@ public class WxAccessTokenHandlerImpl implements WxTokenHandler{
     public void run() {
         while (!stop) {
             if(wxAccessToken != null ) {
-                while (wxAccessToken.expiresIn>30 && !refreshTokenImmediately) {
+                while (wxAccessToken.getExpiresIn()>30 && !refreshTokenImmediately) {
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
@@ -60,7 +64,7 @@ public class WxAccessTokenHandlerImpl implements WxTokenHandler{
                         Thread.yield();
                         continue;
                     }
-                    wxAccessToken.expiresIn--;
+                    wxAccessToken.decExpires();
                 }
                 if(stop) continue;
             }
@@ -74,6 +78,12 @@ public class WxAccessTokenHandlerImpl implements WxTokenHandler{
                     Thread.yield();
                     continue;
                 }
+            }
+            Jedis jedis = jedisPoolHandler.getResource();
+            if (jedis!=null) {
+                jedis.setex(redisTokenKey,wxAccessToken.expiresIn,wxAccessToken.accessToken);
+                jedis.close();
+                logger.info("Update accessToken in redis done!");
             }
         }
     }
@@ -106,9 +116,10 @@ public class WxAccessTokenHandlerImpl implements WxTokenHandler{
         try {
             WxAccessToken acToken = gson.fromJson(responseBody,WxAccessToken.class);
             if(StringUtil.isNullOrEmpty(acToken.getAccessToken())) {
-                logger.error("refreshAccessToken getAccessToken is null");
+                logger.error("refreshAccessToken getAccessToken is null.response body:" + responseBody);
                 return null;
             }
+            logger.info("refresh access token success!");
             return acToken;
 
         } catch (JsonSyntaxException e) {
@@ -119,9 +130,8 @@ public class WxAccessTokenHandlerImpl implements WxTokenHandler{
     }
 
     class WxAccessToken implements Serializable {
-        private String accessToken;
-        private int expiresIn = -1;
-
+        @SerializedName("access_token") private String accessToken;
+        @SerializedName("expires_in") private int expiresIn = -1;
         public String getAccessToken() {
             return accessToken;
         }
@@ -133,6 +143,8 @@ public class WxAccessTokenHandlerImpl implements WxTokenHandler{
         public int getExpiresIn() {
             return expiresIn;
         }
+
+        public void decExpires(){ this.expiresIn--;}
 
         public void setExpiresIn(int expiresIn) {
             this.expiresIn = expiresIn;
