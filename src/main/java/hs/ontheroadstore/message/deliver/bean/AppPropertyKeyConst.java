@@ -15,4 +15,6 @@ public class AppPropertyKeyConst {
     public final static String REDIS_TOKEN_KEY = "RedisTokenKey";
     public final static String REDIS_TICKET_KEY = "RedisTicketKey";
     public final static String REDIS_HEISHI_MESSAGE_CACHE_KEY = "RedisHsMessageCacheKey";
+    public final static String EXECUTOR_SERVICE_POOL_SIZE = "ExecutorServicePoolSize";
+    public final static int MESSAGE_TYPE_HEISHI_ALIONS_PUSH = 1;
 }

@@ -8,11 +8,15 @@ public interface HandleManager {
     WxTokenHandler getWxTokenHandler();
     WxMessageMakeupHandle getWxMessageMakeupHandler();
     JedisPoolHandler getJedisPoolHandler();
-    JsonCacheHandler getJsonCacheHandler();
+    //JsonCacheHandler getJsonCacheHandler();
+    AliOnsProducerHandler getAliOnsProducerHandler();
+    ExecutorServiceHandler getExecutorServiceHandler();
+
     void registerWxTemplateMessageHandler(WxTemplateMessageHandler handler);
     void registerWxTokenHandler(WxTokenHandler handler);
     void registerWxMessageMakeupHandler(WxMessageMakeupHandle handle);
     void registerJedisPoolHandler(JedisPoolHandler handler);
-    void registerJsonCacheHandler(JsonCacheHandler handler);
-
+    //void registerJsonCacheHandler(JsonCacheHandler handler);
+    void registerAliOnsProducerHandler(AliOnsProducerHandler handler);
+    void registerExecutorServiceHandler(ExecutorServiceHandler handler);
 }

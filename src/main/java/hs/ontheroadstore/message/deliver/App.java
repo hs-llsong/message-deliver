@@ -55,12 +55,18 @@ public class App {
         if (!StringUtil.isNullOrEmpty(redis_sport)) {
             redis_port = Integer.valueOf(redis_sport);
         }
+        int threadPoolSize = 5;
+        String poolSize = prop.getProperty(AppPropertyKeyConst.EXECUTOR_SERVICE_POOL_SIZE);
+        if(!StringUtil.isNullOrEmpty(poolSize)) {
+            threadPoolSize = Integer.valueOf(poolSize);
+        }
         JedisPoolHandler jedisPoolHandler = new JedisPoolHandler(redis_host,redis_port,redis_auth,3000);
         app.setHandleManager(new HandleManagerImpl());
         app.getHandleManager().registerJedisPoolHandler(jedisPoolHandler);
+        app.getHandleManager().registerAliOnsProducerHandler(new AliOnsProducerHandlerImpl(prop));
         app.getHandleManager().registerWxTemplateMessageHandler(new WxTemplateMessageHandlerImpl());
         app.getHandleManager().registerWxMessageMakeupHandler(new WxMessageMakeupHandleImpl(prop));
-        app.getHandleManager().registerJsonCacheHandler(new RedisCacheHandlerImpl(jedisPoolHandler,redis_heishi_message_cache_key));
+        app.getHandleManager().registerExecutorServiceHandler(new ExecutorServiceHandlerImpl(app.getHandleManager(),threadPoolSize));
         WxTokenHandler tokenHandler = new WxAccessTokenHandlerImpl(appid,appSecret,jedisPoolHandler,redis_token_key);
         Thread t = new Thread(tokenHandler);
         t.start();
