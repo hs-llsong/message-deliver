@@ -19,7 +19,7 @@ public class ExecutorServiceHandlerImpl implements ExecutorServiceHandler{
     @Override
     public void doWork(int messageType,String message,JsonCacheHandler handler) {
         Runnable worker = null;
-        if(messageType == AppPropertyKeyConst.MESSAGE_TYPE_HEISHI_ALIONS_PUSH) {
+        if (messageType == AppPropertyKeyConst.MESSAGE_TYPE_HEISHI_ALIONS_PUSH) {
             String topic = "";
             worker = new AliOnsProducerWorker(handleManager,handler,topic,message);
         }

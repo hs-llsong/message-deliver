@@ -25,15 +25,18 @@ public class AliOnsProducerWorker implements Runnable{
 
     public void run() {
         Gson gson = new Gson();
-        HsAliOnsPushMessage hsAliOnsPushMessage;
+        HsAliOnsPushMessage hsAliOnsPushMessage = null;
         try {
             hsAliOnsPushMessage = gson.fromJson(message, HsAliOnsPushMessage.class);
         } catch (JsonSyntaxException e) {
             logger.error(e.getMessage()+ ",message push back to redis.");
             jsonCacheHandler.add(message);
             return;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return;
         }
-
+        if (hsAliOnsPushMessage == null) return;
         boolean result = handleManager.getAliOnsProducerHandler().send(hsAliOnsPushMessage.getBody(),topic
                 ,hsAliOnsPushMessage.getTag(),hsAliOnsPushMessage.getKey());
         if (!result) {
