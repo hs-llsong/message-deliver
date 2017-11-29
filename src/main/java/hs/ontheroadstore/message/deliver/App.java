@@ -72,6 +72,10 @@ public class App {
         t.start();
         logger.info("WxAccessTokenHandler service started");
         app.getHandleManager().registerWxTokenHandler(tokenHandler);
+        RedisLooper redisHeishiLooper = new RedisLooper(app.getHandleManager(),"Heishi_redis_key",AppPropertyKeyConst.MESSAGE_TYPE_HEISHI_ALIONS_PUSH);
+        Thread redisThread = new Thread(redisHeishiLooper);
+        redisThread.start();
+        logger.info("Heis redis looper started");
         Consumer NotificationTestConsumer = app.createConsumer(prop,"NotificationTest","heishi");
         if (NotificationTestConsumer == null) {
             tokenHandler.terminate();
