@@ -12,6 +12,8 @@ import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -41,13 +43,30 @@ public class App {
             System.out.println("Weixin appid or secret not set.");
             System.exit(0);
         }
-        String redis_host,redis_auth,redis_sport,redis_token_key,redis_heishi_message_cache_key;
+        String consumeTopics;
+        consumeTopics = prop.getProperty(AppPropertyKeyConst.CONSUME_TOPICS_KEY); //多个topic以,号隔开
+        if (StringUtil.isNullOrEmpty(consumeTopics)) {
+            System.out.println("ConsumeTopics is null");
+            System.exit(0);
+        }
+
+        String[] topics = consumeTopics.split(",");
+        List<String> channelLists = new ArrayList<>();
+        for (String topic: topics
+             ) {
+            String propKey = topic.toUpperCase() + AppPropertyKeyConst.CHANNEL_NAME_SUFFIX;
+            String channelName = prop.getProperty(propKey);
+            if(StringUtil.isNullOrEmpty(channelName)) continue;
+            channelLists.add(channelName);
+        }
+
+        String redis_host,redis_auth,redis_sport,redis_token_key;
         int redis_port = 6379;
         redis_host = prop.getProperty(AppPropertyKeyConst.REDIS_HOST_KEY);
         redis_auth = prop.getProperty(AppPropertyKeyConst.REDIS_AUTH);
         redis_sport = prop.getProperty(AppPropertyKeyConst.REDIS_PORT_KEY);
         redis_token_key = prop.getProperty(AppPropertyKeyConst.REDIS_TOKEN_KEY);
-        redis_heishi_message_cache_key = prop.getProperty(AppPropertyKeyConst.REDIS_HEISHI_MESSAGE_CACHE_KEY);
+
         if (StringUtil.isNullOrEmpty(redis_host)) {
             System.out.println("Redis host must be set.");
             System.exit(0);
@@ -72,27 +91,33 @@ public class App {
         t.start();
         logger.info("WxAccessTokenHandler service started");
         app.getHandleManager().registerWxTokenHandler(tokenHandler);
-        RedisLooper redisHeishiLooper = new RedisLooper(app.getHandleManager(),"Heishi_redis_key",AppPropertyKeyConst.MESSAGE_TYPE_HEISHI_ALIONS_PUSH);
-        Thread redisThread = new Thread(redisHeishiLooper);
-        redisThread.start();
-        logger.info("Heis redis looper started");
-        Consumer NotificationTestConsumer = app.createConsumer(prop,"NotificationTest","heishi");
-        if (NotificationTestConsumer == null) {
-            tokenHandler.terminate();
-            try {
-                System.out.println("Wait for thread exit.");
-                t.join();
-                System.out.println("Consumer create failed.game over.");
-                System.exit(0);
-            } catch (InterruptedException e) {
-
-            }
+        String heishiRedisKey = prop.getProperty(AppPropertyKeyConst.REDIS_HEISHI_MESSAGE_CACHE_KEY);
+        if (!StringUtil.isNullOrEmpty(heishiRedisKey)) {
+            RedisLooper redisHeishiLooper = new RedisLooper(app.getHandleManager(),heishiRedisKey,AppPropertyKeyConst.MESSAGE_TYPE_HEISHI_ALIONS_PUSH);
+            Thread redisThread = new Thread(redisHeishiLooper);
+            redisThread.start();
+            logger.info("Heishi redis looper started");
         }
-        NotificationTestConsumer.start();
-        logger.info("Notification consumer service started");
+
+        for (String channelName:channelLists) {
+            Consumer Consumer = app.createConsumer(prop,channelName);
+            if (Consumer == null) {
+                logger.error("Consumer " + channelName + " create failed.");
+            }
+            Consumer.start();
+            logger.info( channelName + " consumer service started.");
+        }
+
+        Runtime.getRuntime().addShutdownHook(new Thread(){
+            @Override
+            public void run() {
+                System.out.println("System exit.");
+            }
+        });
+
     }
 
-    private Consumer createConsumer(final Properties properties,String channelName,String subExpression) {
+    private Consumer createConsumer(final Properties properties,String channelName) {
         Properties prop = this.getChannelProperties(properties,channelName);
         if(prop.isEmpty()) {
             logger.error("Can't load properites for "+channelName);
@@ -101,7 +126,17 @@ public class App {
         Consumer consumer;
         try {
             consumer = ONSFactory.createConsumer(prop);
-            consumer.subscribe(prop.getProperty(OnsPropertyKeyConst.Topic), subExpression, new DeliverListener(this));
+            String topic = prop.getProperty(OnsPropertyKeyConst.Topic);
+            if (StringUtil.isNullOrEmpty(topic)) {
+                logger.error("create consumer failed.because topic is null.");
+                consumer.shutdown();
+                return null;
+            }
+            String subExpression = prop.getProperty(OnsPropertyKeyConst.ConsumerTag);
+            if(StringUtil.isNullOrEmpty(subExpression)) {
+                subExpression = "*";
+            }
+            consumer.subscribe(topic, subExpression, new DeliverListener(this));
         } catch (ONSClientException e) {
             logger.error(e.getMessage());
             return null;

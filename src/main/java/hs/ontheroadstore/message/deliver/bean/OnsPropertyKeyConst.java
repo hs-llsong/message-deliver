@@ -24,4 +24,6 @@ public class OnsPropertyKeyConst {
     public static final String SecretKey = "SecretKey";
 
     public static final String Topic = "Topic";
+
+    public static final String ConsumerTag = "ConsumerTag";
 }

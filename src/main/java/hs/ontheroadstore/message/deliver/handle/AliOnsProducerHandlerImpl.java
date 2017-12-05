@@ -1,5 +1,6 @@
 package hs.ontheroadstore.message.deliver.handle;
 
+import hs.ontheroadstore.message.deliver.bean.AppPropertyKeyConst;
 import hs.ontheroadstore.message.deliver.bean.OnsProducer;
 import hs.ontheroadstore.message.deliver.bean.OnsPropertyKeyConst;
 import org.apache.log4j.Logger;
@@ -21,7 +22,7 @@ public class AliOnsProducerHandlerImpl implements AliOnsProducerHandler {
     }
 
     private OnsProducer createProducer(String topic) {
-        String channelKey = topic.toUpperCase()+ "_CHANNEL_NAME";
+        String channelKey = topic.toUpperCase() + AppPropertyKeyConst.CHANNEL_NAME_SUFFIX;
         if(!propAll.containsKey(channelKey)) {
             logger.error("Channel name not found. for topic:" + topic);
             return null;
