@@ -10,13 +10,14 @@ public interface HandleManager {
     JedisPoolHandler getJedisPoolHandler();
     //JsonCacheHandler getJsonCacheHandler();
     AliOnsProducerHandler getAliOnsProducerHandler();
-    ExecutorServiceHandler getExecutorServiceHandler();
-
+    ProducerExecutorServiceHandler getExecutorServiceHandler();
+    AppMessagePushHandler getAppMessagePushHandler();
     void registerWxTemplateMessageHandler(WxTemplateMessageHandler handler);
     void registerWxTokenHandler(WxTokenHandler handler);
     void registerWxMessageMakeupHandler(WxMessageMakeupHandle handle);
     void registerJedisPoolHandler(JedisPoolHandler handler);
     //void registerJsonCacheHandler(JsonCacheHandler handler);
     void registerAliOnsProducerHandler(AliOnsProducerHandler handler);
-    void registerExecutorServiceHandler(ExecutorServiceHandler handler);
+    void registerExecutorServiceHandler(ProducerExecutorServiceHandler handler);
+    void registerAppMessagePushHandler(AppMessagePushHandler handler);
 }

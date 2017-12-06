@@ -1,5 +1,7 @@
 package hs.ontheroadstore.message.deliver.handle;
 
+import hs.ontheroadstore.message.deliver.App;
+
 /**
  * Created by Jeffrey(zuoyaofei@icloud.com) on 17/11/21.
  */
@@ -10,7 +12,8 @@ public class HandleManagerImpl implements HandleManager {
     private JsonCacheHandler jsonCacheHandler;
     private JedisPoolHandler jedisPoolHandler;
     private AliOnsProducerHandler aliOnsProducerHandler;
-    private ExecutorServiceHandler executorServiceHandler;
+    private ProducerExecutorServiceHandler executorServiceHandler;
+    private AppMessagePushHandler appMessagePushHandler;
     @Override
     public AliOnsProducerHandler getAliOnsProducerHandler() {
         return this.aliOnsProducerHandler;
@@ -63,12 +66,22 @@ public class HandleManagerImpl implements HandleManager {
 
 
     @Override
-    public ExecutorServiceHandler getExecutorServiceHandler() {
+    public ProducerExecutorServiceHandler getExecutorServiceHandler() {
         return executorServiceHandler;
     }
 
     @Override
-    public void registerExecutorServiceHandler(ExecutorServiceHandler handler) {
+    public void registerExecutorServiceHandler(ProducerExecutorServiceHandler handler) {
         this.executorServiceHandler = handler;
+    }
+
+    @Override
+    public AppMessagePushHandler getAppMessagePushHandler() {
+        return appMessagePushHandler;
+    }
+
+    @Override
+    public void registerAppMessagePushHandler(AppMessagePushHandler appMessagePushHandler) {
+        this.appMessagePushHandler = appMessagePushHandler;
     }
 }

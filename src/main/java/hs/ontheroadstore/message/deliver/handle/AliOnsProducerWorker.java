@@ -1,7 +1,9 @@
 package hs.ontheroadstore.message.deliver.handle;
 
+import com.aliyun.openservices.shade.io.netty.util.internal.StringUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import hs.ontheroadstore.message.deliver.bean.AppPropertyKeyConst;
 import hs.ontheroadstore.message.deliver.bean.HsAliOnsPushMessage;
 import org.apache.log4j.Logger;
 
@@ -36,13 +38,20 @@ public class AliOnsProducerWorker implements Runnable{
             logger.error(e.getMessage());
             return;
         }
-        if (hsAliOnsPushMessage == null) return;
+        if (hsAliOnsPushMessage == null) {
+            logger.error("be push object is null.");
+            return;
+        }
+        String tag = hsAliOnsPushMessage.getTag();
+
+        if(StringUtil.isNullOrEmpty(tag)) {
+            tag = AppPropertyKeyConst.DEFAULT_ALIONS_TAG;
+        }
         boolean result = handleManager.getAliOnsProducerHandler().send(hsAliOnsPushMessage.getBody(),topic
-                ,hsAliOnsPushMessage.getTag(),hsAliOnsPushMessage.getKey());
+                ,tag,hsAliOnsPushMessage.getKey());
         if (!result) {
             logger.error("Send message failed,push message back to redis.message:" + message);
             jsonCacheHandler.add(message);
         }
-
     }
 }

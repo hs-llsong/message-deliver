@@ -58,8 +58,12 @@ public class AliOnsProducerHandlerImpl implements AliOnsProducerHandler {
             onsProducer = producerMap.get(topic);
         } else {
             onsProducer = this.createProducer(topic);
-            if(onsProducer == null) return false;
+            if(onsProducer == null) {
+                logger.error("createProducer for " + topic + " failed.");
+                return false;
+            }
         }
+        logger.debug("to call OnsProducer do send message tag:" + tag + ",topic:" + topic);
         return onsProducer.send(message,tag,key);
     }
 }

@@ -8,6 +8,7 @@ import com.aliyun.openservices.shade.io.netty.util.internal.StringUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import hs.ontheroadstore.message.deliver.App;
+import hs.ontheroadstore.message.deliver.bean.AppPropertyKeyConst;
 import hs.ontheroadstore.message.deliver.bean.WeixinMessageTemplate;
 import hs.ontheroadstore.message.deliver.bean.WxTemplateMessage;
 import hs.ontheroadstore.message.deliver.bean.WxTemplateMessageResponse;
@@ -31,7 +32,37 @@ public class DeliverListener implements MessageListener{
             logger.error("Empty message:" + new Gson().toJson(message));
             return Action.CommitMessage;
         }
-        return doWxTemplateMessage(msgData);
+        String tag = message.getTag();
+        if (StringUtil.isNullOrEmpty(tag)) {
+            logger.error("Not tag message.give up:" + msgData);
+            return Action.CommitMessage;
+        }
+        switch (tag) {
+            case AppPropertyKeyConst.MSG_TAG_WEIXIN_TEMPLATE:
+                return doWxTemplateMessage(msgData);
+            case AppPropertyKeyConst.MSG_TAG_IOS:
+                return doIosMessage(msgData);
+            case AppPropertyKeyConst.MSG_TAG_android:
+                return doAndroidMessage(msgData);
+            case AppPropertyKeyConst.MSG_TAG_WX_APP:
+                return doWxAppMessage(msgData);
+            default:
+                logger.info("other message tag:" + tag);
+                break;
+        }
+        return Action.CommitMessage;
+    }
+    private Action doIosMessage(String message) {
+        logger.info("doIosMessage:" + message);
+        return Action.CommitMessage;
+    }
+    private Action doAndroidMessage(String message) {
+        logger.info("doAndroidMessage:" + message);
+        return Action.CommitMessage;
+    }
+    private Action doWxAppMessage(String message) {
+        logger.info("doWxAppMessage:" + message);
+        return Action.CommitMessage;
     }
     private Action doWxTemplateMessage(String message) {
 
@@ -78,13 +109,13 @@ public class DeliverListener implements MessageListener{
             return Action.CommitMessage;
         }
 
+
         WxTemplateMessageResponse wxTemplateMessageResponse =
                     app.getHandleManager().getWxTemplateMessageHandler().send(weixinMessageTemplate,accessToken);
         if (wxTemplateMessageResponse == null) {
             logger.info("Send weixin template message response null,Reconsume later");
             return Action.ReconsumeLater;
         }
-        logger.debug("Send message finished. response:" + new Gson().toJson(wxTemplateMessageResponse));
         if (wxTemplateMessageResponse.getErrcode()!=0) {
             logger.error("Error code:" + wxTemplateMessageResponse.getErrcode());
             switch (wxTemplateMessageResponse.getErrcode()) {
@@ -96,9 +127,11 @@ public class DeliverListener implements MessageListener{
                     logger.error("Reconsume later.Send message failed." + wxTemplateMessageResponse.getErrmsg());
                     return Action.ReconsumeLater;
                 case 40001:
-                    app.getHandleManager().getWxTokenHandler().refreshToken();
+                    //app.getHandleManager().getWxTokenHandler().refreshToken();
                     logger.error("Reconsume later.Send message 40001 error." + wxTemplateMessageResponse.getErrmsg());
                     return Action.ReconsumeLater;
+                case 40003: //invalid openid hint
+                    break;
                 default:
                     break;
             }

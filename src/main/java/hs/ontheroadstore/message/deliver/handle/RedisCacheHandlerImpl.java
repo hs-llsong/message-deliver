@@ -18,7 +18,10 @@ public class RedisCacheHandlerImpl implements JsonCacheHandler{
     @Override
     public String poll() {
         Jedis jedis = jedisPoolHandler.getResource();
-        if (jedis == null) return null;
+        if (jedis == null){
+            logger.error("Get jedis null from pool.");
+            return null;
+        }
         try {
             String result = jedis.lpop(cacheKey);
             jedis.close();

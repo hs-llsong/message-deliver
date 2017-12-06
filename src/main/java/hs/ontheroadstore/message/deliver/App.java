@@ -85,18 +85,52 @@ public class App {
         app.getHandleManager().registerAliOnsProducerHandler(new AliOnsProducerHandlerImpl(prop));
         app.getHandleManager().registerWxTemplateMessageHandler(new WxTemplateMessageHandlerImpl());
         app.getHandleManager().registerWxMessageMakeupHandler(new WxMessageMakeupHandleImpl(prop));
-        app.getHandleManager().registerExecutorServiceHandler(new ExecutorServiceHandlerImpl(app.getHandleManager(),threadPoolSize));
-        WxTokenHandler tokenHandler = new WxAccessTokenHandlerImpl(appid,appSecret,jedisPoolHandler,redis_token_key);
-        Thread t = new Thread(tokenHandler);
-        t.start();
-        logger.info("WxAccessTokenHandler service started");
-        app.getHandleManager().registerWxTokenHandler(tokenHandler);
+        app.getHandleManager().registerExecutorServiceHandler(new ProducerExecutorServiceHandlerImpl(app.getHandleManager(),threadPoolSize));
+        app.getHandleManager().registerAppMessagePushHandler(new AliAcsMessagePushHandlerImpl(prop));
+
+        boolean wxAccessTokenReadonly = false;
+        String isWxAccessTokenReadonly = prop.getProperty(AppPropertyKeyConst.WX_ACCESS_TOKEN_READONLY_KEY);
+        if (!StringUtil.isNullOrEmpty(isWxAccessTokenReadonly)) {
+            if(isWxAccessTokenReadonly.toUpperCase().equals("TRUE")) {
+                wxAccessTokenReadonly = true;
+            }
+        }
+        if (wxAccessTokenReadonly) {
+            WxTokenHandler tokenHandler = new WxAccessTokenHandlerImpl(jedisPoolHandler,redis_token_key);
+            app.getHandleManager().registerWxTokenHandler(tokenHandler);
+        } else {
+            WxTokenAutoRefreshHandler tokenHandler = new WxAccessTokenAutoRefreshHandlerImpl(appid,appSecret,jedisPoolHandler,redis_token_key);
+            Thread t = new Thread(tokenHandler);
+            t.start();
+            logger.info("WxTokenAutoRefreshHandler service started");
+            app.getHandleManager().registerWxTokenHandler(tokenHandler);
+        }
+
+        boolean loadingRedisListener = true;
+        String isRedisCacheListening = prop.getProperty(AppPropertyKeyConst.REDIS_CACHE_LISTEN_KEY);
+        if (!StringUtil.isNullOrEmpty(isRedisCacheListening)) {
+            //default loading Redis pool
+            if(isRedisCacheListening.toUpperCase().equals("FALSE")){
+                loadingRedisListener = false;
+            }
+        }
         String heishiRedisKey = prop.getProperty(AppPropertyKeyConst.REDIS_HEISHI_MESSAGE_CACHE_KEY);
-        if (!StringUtil.isNullOrEmpty(heishiRedisKey)) {
-            RedisLooper redisHeishiLooper = new RedisLooper(app.getHandleManager(),heishiRedisKey,AppPropertyKeyConst.MESSAGE_TYPE_HEISHI_ALIONS_PUSH);
+        String heishiRedisProcuderTopic = prop.getProperty(AppPropertyKeyConst.REDIS_HEISHI_MESSAGE_PRODUCER_TOPIC_KEY);
+        if (StringUtil.isNullOrEmpty(heishiRedisKey)) {
+            logger.info("Listener redis key is null. ");
+            loadingRedisListener = false;
+        }
+        if (StringUtil.isNullOrEmpty(heishiRedisProcuderTopic)) {
+            logger.info("Listener redis cache producer topic is null.");
+            loadingRedisListener = false;
+        }
+        if (loadingRedisListener) {
+            RedisLooper redisHeishiLooper = new RedisLooper(app.getHandleManager(),heishiRedisKey,heishiRedisProcuderTopic);
             Thread redisThread = new Thread(redisHeishiLooper);
             redisThread.start();
-            logger.info("Heishi redis looper started");
+            logger.info("Heishi redis looper started. producer topic:" + heishiRedisProcuderTopic + ",cache key:" + heishiRedisKey);
+        } else {
+            logger.info("Listener redis is disabled.");
         }
 
         for (String channelName:channelLists) {
