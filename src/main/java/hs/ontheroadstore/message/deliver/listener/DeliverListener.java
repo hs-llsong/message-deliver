@@ -41,9 +41,9 @@ public class DeliverListener implements MessageListener{
             case AppPropertyKeyConst.MSG_TAG_WEIXIN_TEMPLATE:
                 return doWxTemplateMessage(msgData);
             case AppPropertyKeyConst.MSG_TAG_IOS:
-                return doIosMessage(msgData);
+                return doIosMessage(msgData,message.getKey());
             case AppPropertyKeyConst.MSG_TAG_android:
-                return doAndroidMessage(msgData);
+                return doAndroidMessage(msgData,message.getKey());
             case AppPropertyKeyConst.MSG_TAG_WX_APP:
                 return doWxAppMessage(msgData);
             default:
@@ -52,12 +52,25 @@ public class DeliverListener implements MessageListener{
         }
         return Action.CommitMessage;
     }
-    private Action doIosMessage(String message) {
-        logger.info("doIosMessage:" + message);
-        return Action.CommitMessage;
+
+    /**
+     *
+     * @param message
+     * @param key  push type. notice or message
+     * @return
+     */
+    private Action doIosMessage(String message,String key) {
+        return doMobileNoticeMessage(message,AppPropertyKeyConst.DEVICE_IOS);
     }
-    private Action doAndroidMessage(String message) {
-        logger.info("doAndroidMessage:" + message);
+    private Action doAndroidMessage(String message,String key) {
+        return doMobileNoticeMessage(message,AppPropertyKeyConst.DEVICE_ANDROID);
+    }
+    private Action doMobileNoticeMessage (String message,int deviceType) {
+        boolean result = app.getHandleManager()
+                .getAppMessagePushHandler()
+                .send(message,deviceType,AppPropertyKeyConst.PUSH_TYPE_NOTICE);
+        logger.debug("doMobileNoticeMessage:" + message + ",result =" + result);
+        if(result == false) return Action.ReconsumeLater;
         return Action.CommitMessage;
     }
     private Action doWxAppMessage(String message) {
