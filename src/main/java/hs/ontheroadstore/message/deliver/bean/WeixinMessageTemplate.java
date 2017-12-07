@@ -1,39 +1,49 @@
 package hs.ontheroadstore.message.deliver.bean;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Jeffrey(zuoyaofei@icloud.com) on 17/11/23.
  */
 public class WeixinMessageTemplate implements Serializable {
-
-    private String toUser;
-    private String templateId;
+    @SerializedName("touser") private String toUser;
+    @SerializedName("template_id") private String templateId;
     private String url;
-    private String topColor;
-    private List<Element> datas = new ArrayList<>();
+    //private String topColor;
+    @SerializedName("miniprogram") MiniProgram miniProgram;
+    private Map<String,ObjData> data = new HashMap<>();
+    class MiniProgram {
+        String appid;
+        String pagepath;
+        public String getAppid() {
+            return appid;
+        }
 
-    class Element {
-        private String name;
+        public void setAppid(String appid) {
+            this.appid = appid;
+        }
+
+        public String getPagepath() {
+            return pagepath;
+        }
+
+        public void setPagepath(String pagepath) {
+            this.pagepath = pagepath;
+        }
+    }
+    class ObjData {
         private String value;
         private String color;
-
-        public Element(String name, String value, String color) {
-            this.name = name;
+        public ObjData(String value, String color) {
             this.value = value;
             this.color = color;
         }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
         public String getValue() {
             return value;
         }
@@ -52,7 +62,7 @@ public class WeixinMessageTemplate implements Serializable {
     }
 
     public void addElement(String name,String value,String color) {
-        this.datas.add(new Element(name,value,color));
+        this.data.put(name,new ObjData(value,color));
     }
 
     public String getToUser() {
@@ -79,19 +89,11 @@ public class WeixinMessageTemplate implements Serializable {
         this.url = url;
     }
 
-    public String getTopColor() {
-        return topColor;
+    public Map<String, ObjData> getData() {
+        return data;
     }
 
-    public void setTopColor(String topColor) {
-        this.topColor = topColor;
-    }
-
-    public List<Element> getDatas() {
-        return datas;
-    }
-
-    public void setDatas(List<Element> datas) {
-        this.datas = datas;
+    public void setData(Map<String, ObjData> data) {
+        this.data = data;
     }
 }

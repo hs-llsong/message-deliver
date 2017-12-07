@@ -63,7 +63,7 @@ public class WxMessageMakeupHandleImpl implements WxMessageMakeupHandle{
         WeixinMessageTemplate messageTemplate = new WeixinMessageTemplate();
         messageTemplate.setToUser(message.getToUser());
         messageTemplate.setTemplateId(messageStyle.getTemplateId());
-        messageTemplate.setTopColor(messageStyle.getColor());
+        //messageTemplate.setTopColor(messageStyle.getColor());
         if (StringUtil.isNullOrEmpty(message.getJumpUrl())) {
            messageTemplate.setUrl(messageStyle.getJumpUrl());
         } else {
