@@ -26,22 +26,26 @@ public class IosPushHandler extends MobilePushHandler{
     @Override
     AcsRequest makeRequest(String message, int pushType) {
         try {
-            /*
+
             //Test using old message
+            Gson gson = new Gson();
             BaseMobileMessage baseMobileMessage = null;
-            OldIosPushMessage oldIosPushMessage = new Gson().fromJson(message,OldIosPushMessage.class);
-            if(oldIosPushMessage == null) {
-                logger.error("parse message to json return null:"+ message);
-                return null;
+            OldIosPushMessage oldIosPushMessage = gson.fromJson(message,OldIosPushMessage.class);
+            if(oldIosPushMessage != null) {
+                if (oldIosPushMessage.getType() > 0) {
+                    baseMobileMessage = new BaseMobileMessage();
+                    baseMobileMessage.setExtParameters(oldIosPushMessage.getiOSExtParameters());
+                    baseMobileMessage.setBody(oldIosPushMessage.getSummary());
+                    baseMobileMessage.setTitle(oldIosPushMessage.getTitle());
+                    baseMobileMessage.setTarget("DEVICE");
+                    baseMobileMessage.setTargetValue(oldIosPushMessage.getDeviceId());
+                } else {
+                    baseMobileMessage = gson.fromJson(message, BaseMobileMessage.class);
+                }
             } else {
-                baseMobileMessage = new BaseMobileMessage();
-                baseMobileMessage.setExtParameters(oldIosPushMessage.getiOSExtParameters());
-                baseMobileMessage.setBody(oldIosPushMessage.getSummary());
-                baseMobileMessage.setTitle(oldIosPushMessage.getTitle());
-                baseMobileMessage.setTarget("DEVICE");
-                baseMobileMessage.setTargetValue(oldIosPushMessage.getDeviceId());
-            }*/
-            BaseMobileMessage baseMobileMessage = new Gson().fromJson(message, BaseMobileMessage.class);
+                baseMobileMessage = gson.fromJson(message, BaseMobileMessage.class);
+            }
+
             if (baseMobileMessage == null) {
                 logger.error("parse message to json return null:"+ message);
                 return null;
