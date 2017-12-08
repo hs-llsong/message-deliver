@@ -2,12 +2,12 @@
 一个能够实时推送消息到微信、ios APP、android APP的服务端JAVA程序
 - 前端可以通过redis 缓存直接发送待发消息，也可以通过http 协议从ali ons发送消息，最终都会汇聚到message-deliver从容分发。
 - 目前移动推送渠道使用的是通过阿里的移动推送
-- 消息传递管道使用的是阿里消息队队
+- 消息传递管道使用的是阿里消息队列
 - 配置文件 conf/config.properites
 # 配置文件示例
 #Consumer topics,多个以,号隔开
 ConsumeTopics=templatemessage
-#和topic对应的channel name
+#和topic对应的channel name 格式= UPCASE(topic)_CHANNEL_NAME
 TEMPLATEMESSAGE_CHANNEL_NAME=NotificationTest
 #每个channel 的配置
 NotificationTestConsumerId=CID-message001
@@ -32,7 +32,7 @@ RedisPort=6379
 RedisAuth=
 
 #是否只读访问微信accessToken
-- 如果true,会自动从微信刷新token到redis
+- 如果true,会自动定时从微信接口刷新token到redis
   WxAccessTokenReadOnly=false
   RedisTokenKey=heimarket_wx_token
   RedisTicketKey=heimarket_wx_ticket
