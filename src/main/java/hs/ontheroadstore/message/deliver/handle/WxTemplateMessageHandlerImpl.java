@@ -17,10 +17,9 @@ import java.io.IOException;
 public class WxTemplateMessageHandlerImpl implements WxTemplateMessageHandler {
     static final String WEIXIN_TEMPLATE_MESSAGE_URL = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=";
     private final Logger logger = Logger.getLogger(WxTemplateMessageHandlerImpl.class);
-
+    private HsHttpClient hsHttpClient = new HsHttpClient();
     @Override
     public WxTemplateMessageResponse send(WeixinMessageTemplate message, String accessToken) {
-        HsHttpClient hsHttpClient = new HsHttpClient();
         Gson gson = new GsonBuilder().create();
         String jsonBody = gson.toJson(message);
         logger.debug("Request json body:" + jsonBody);

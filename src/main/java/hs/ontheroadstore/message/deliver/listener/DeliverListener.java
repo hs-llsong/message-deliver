@@ -47,10 +47,8 @@ public class DeliverListener implements MessageListener{
             case AppPropertyKeyConst.MSG_TAG_WX_APP:
                 return doWxAppMessage(msgData);
             default:
-                logger.info("other message tag:" + tag);
-                break;
+                return doWxTemplateMessage(msgData);
         }
-        return Action.CommitMessage;
     }
 
     /**
