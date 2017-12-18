@@ -67,7 +67,7 @@ public class DeliverListener implements MessageListener{
         boolean result = app.getHandleManager()
                 .getAppMessagePushHandler()
                 .send(message,deviceType,AppPropertyKeyConst.PUSH_TYPE_NOTICE);
-        logger.debug("doMobileNoticeMessage:" + message + ",result =" + result);
+
         if(result == false) return Action.ReconsumeLater;
         return Action.CommitMessage;
     }

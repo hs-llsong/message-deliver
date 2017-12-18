@@ -24,32 +24,8 @@ public class IosPushHandler extends MobilePushHandler{
     }
 
     @Override
-    AcsRequest makeRequest(String message, int pushType) {
+    AcsRequest makeRequest(BaseMobileMessage baseMobileMessage,int pushType) {
         try {
-
-            //Test using old message
-            Gson gson = new Gson();
-            BaseMobileMessage baseMobileMessage = null;
-            OldIosPushMessage oldIosPushMessage = gson.fromJson(message,OldIosPushMessage.class);
-            if(oldIosPushMessage != null) {
-                if (oldIosPushMessage.getType() > 0) {
-                    baseMobileMessage = new BaseMobileMessage();
-                    baseMobileMessage.setExtParameters(oldIosPushMessage.getiOSExtParameters());
-                    baseMobileMessage.setBody(oldIosPushMessage.getSummary());
-                    baseMobileMessage.setTitle(oldIosPushMessage.getTitle());
-                    baseMobileMessage.setTarget("DEVICE");
-                    baseMobileMessage.setTargetValue(oldIosPushMessage.getDeviceId());
-                } else {
-                    baseMobileMessage = gson.fromJson(message, BaseMobileMessage.class);
-                }
-            } else {
-                baseMobileMessage = gson.fromJson(message, BaseMobileMessage.class);
-            }
-
-            if (baseMobileMessage == null) {
-                logger.error("parse message to json return null:"+ message);
-                return null;
-            }
             if (pushType == AppPropertyKeyConst.PUSH_TYPE_NOTICE) {
                 PushNoticeToiOSRequest iosRequest = new PushNoticeToiOSRequest();
                 iosRequest.setProtocol(ProtocolType.HTTPS);

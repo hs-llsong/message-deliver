@@ -5,6 +5,9 @@ import com.aliyuncs.AcsRequest;
 import com.aliyuncs.AcsResponse;
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.push.model.v20160801.*;
+import com.google.gson.Gson;
+import hs.ontheroadstore.message.deliver.bean.BaseMobileMessage;
+import hs.ontheroadstore.message.deliver.bean.OldIosPushMessage;
 import org.apache.log4j.Logger;
 
 /**
@@ -54,6 +57,45 @@ public abstract class MobilePushHandler {
         }
     }
 
-    abstract AcsRequest makeRequest(String message,int pushType);
+    AcsRequest makeRequest(String message,int pushType) {
+        Gson gson = new Gson();
+        BaseMobileMessage baseMobileMessage;
+        try {
+            baseMobileMessage = gson.fromJson(message,BaseMobileMessage.class);
+        } catch (Exception e) {
+            logger.error("error " + e.getMessage());
+            return null;
+        }
+        boolean isOldIosMessage = false;
+        if(baseMobileMessage == null ){
+            logger.debug("parser json error.may be old ios message.");
+            isOldIosMessage = true;
+        } else {
+            if (StringUtil.isNullOrEmpty(baseMobileMessage.getTarget())) {
+                isOldIosMessage = true;
+            }
+        }
+        if (isOldIosMessage) {
+            OldIosPushMessage oldIosPushMessage;
+            try {
+                oldIosPushMessage = gson.fromJson(message, OldIosPushMessage.class);
+            }catch (Exception e) {
+                logger.error("parse old ios Message error: " + e.getMessage());
+                return null;
+            }
+            if (oldIosPushMessage == null) {
+                logger.debug("oldIosPushMessage is null");
+                return null;
+            }
+            baseMobileMessage = new BaseMobileMessage();
+            baseMobileMessage.setExtParameters(oldIosPushMessage.getiOSExtParameters());
+            baseMobileMessage.setBody(oldIosPushMessage.getSummary());
+            baseMobileMessage.setTitle(oldIosPushMessage.getTitle());
+            baseMobileMessage.setTarget("DEVICE");
+            baseMobileMessage.setTargetValue(oldIosPushMessage.getDeviceId());
+        }
+        return makeRequest(baseMobileMessage,pushType);
+    }
+    abstract AcsRequest makeRequest(BaseMobileMessage baseMobileMessage,int pushType);
 
 }
