@@ -170,7 +170,7 @@ public class App {
             if(StringUtil.isNullOrEmpty(subExpression)) {
                 subExpression = "*";
             }
-            consumer.subscribe(topic, subExpression, new DeliverListener(this));
+            consumer.subscribe(topic, subExpression, new DeliverListener(this,topic));
         } catch (ONSClientException e) {
             logger.error(e.getMessage());
             return null;
