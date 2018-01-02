@@ -25,6 +25,8 @@ public class WxAccessTokenAutoRefreshHandlerImpl implements WxTokenAutoRefreshHa
     private final Logger logger = Logger.getLogger(WxAccessTokenAutoRefreshHandlerImpl.class);
     private HsHttpClient hsHttpClient;
     private boolean refreshTokenImmediately = false;
+    private int lastRefreshTime = 0;
+    private int refreshFrozeTime = 5*60;  // 5 minutes
     private volatile boolean stop = false;
     private JedisPoolHandler jedisPoolHandler;
     private String redisTokenKey;
@@ -49,6 +51,10 @@ public class WxAccessTokenAutoRefreshHandlerImpl implements WxTokenAutoRefreshHa
 
     @Override
     public void refreshToken() {
+        int curTime = (int)(System.currentTimeMillis()/1000);
+        if(this.lastRefreshTime>0) {
+            if(curTime-this.lastRefreshTime<this.refreshFrozeTime) return;
+        }
         refreshTokenImmediately = true;
     }
 
@@ -68,6 +74,7 @@ public class WxAccessTokenAutoRefreshHandlerImpl implements WxTokenAutoRefreshHa
                 }
                 if(stop) continue;
             }
+            this.lastRefreshTime = (int)(System.currentTimeMillis()/1000);
             wxAccessToken = refreshAccessToken();
             if(refreshTokenImmediately) refreshTokenImmediately=false;
             if (wxAccessToken == null) {

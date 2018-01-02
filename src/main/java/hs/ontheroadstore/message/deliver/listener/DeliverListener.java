@@ -12,6 +12,8 @@ import hs.ontheroadstore.message.deliver.bean.AppPropertyKeyConst;
 import hs.ontheroadstore.message.deliver.bean.WeixinMessageTemplate;
 import hs.ontheroadstore.message.deliver.bean.WxTemplateMessage;
 import hs.ontheroadstore.message.deliver.bean.WxTemplateMessageResponse;
+import hs.ontheroadstore.message.deliver.handle.WxTokenAutoRefreshHandler;
+import hs.ontheroadstore.message.deliver.handle.WxTokenHandler;
 import org.apache.log4j.Logger;
 
 /**
@@ -21,12 +23,16 @@ import org.apache.log4j.Logger;
 public class DeliverListener implements MessageListener{
     private App app;
     private final Logger logger = Logger.getLogger(DeliverListener.class);
-    public DeliverListener(final App app) {
+    private String topic;
+    public DeliverListener(final App app,final String topic) {
         this.app = app;
+        this.topic = topic;
     }
     @Override
     public Action consume(Message message, ConsumeContext context) {
         String msgData = new String(message.getBody());
+
+        //TODO 记录消息发送总数，每日发送总数，成功数，失败数，重试数
         logger.debug("consume message:" + msgData);
         if (StringUtil.isNullOrEmpty(msgData)) {
             logger.error("Empty message:" + new Gson().toJson(message));
@@ -47,10 +53,8 @@ public class DeliverListener implements MessageListener{
             case AppPropertyKeyConst.MSG_TAG_WX_APP:
                 return doWxAppMessage(msgData);
             default:
-                logger.info("other message tag:" + tag);
-                break;
+                return doWxTemplateMessage(msgData);
         }
-        return Action.CommitMessage;
     }
 
     /**
@@ -69,7 +73,7 @@ public class DeliverListener implements MessageListener{
         boolean result = app.getHandleManager()
                 .getAppMessagePushHandler()
                 .send(message,deviceType,AppPropertyKeyConst.PUSH_TYPE_NOTICE);
-        logger.debug("doMobileNoticeMessage:" + message + ",result =" + result);
+
         if(result == false) return Action.ReconsumeLater;
         return Action.CommitMessage;
     }
@@ -140,7 +144,11 @@ public class DeliverListener implements MessageListener{
                     logger.error("Reconsume later.Send message failed." + wxTemplateMessageResponse.getErrmsg());
                     return Action.ReconsumeLater;
                 case 40001:
-                    //app.getHandleManager().getWxTokenHandler().refreshToken();
+                    WxTokenHandler handler = app.getHandleManager().getWxTokenHandler();
+                    if(handler instanceof WxTokenAutoRefreshHandler) {
+                        ((WxTokenAutoRefreshHandler) handler).refreshToken();
+                    }
+                    //app.getHandleManager().getWxTokenHandler().
                     logger.error("Reconsume later.Send message 40001 error." + wxTemplateMessageResponse.getErrmsg());
                     return Action.ReconsumeLater;
                 case 40003: //invalid openid hint

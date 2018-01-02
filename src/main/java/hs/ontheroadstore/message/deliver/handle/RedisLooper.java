@@ -36,7 +36,6 @@ public class RedisLooper implements Runnable{
                 }
                 continue;
             }
-            logger.debug("message from redis:"+message);
             handleManager.getExecutorServiceHandler().doWork(topic,message,cacheHandler);
             Thread.yield();
         }

@@ -21,19 +21,7 @@ public class AndroidPushHandler extends MobilePushHandler{
     }
 
     @Override
-    AcsRequest makeRequest(String message, int pushType) {
-
-        BaseMobileMessage baseMobileMessage = null;
-        try {
-            baseMobileMessage = new Gson().fromJson(message, BaseMobileMessage.class);
-        }catch (Exception e) {
-            logger.error(e.getMessage());
-            return null;
-        }
-        if (baseMobileMessage == null) {
-            logger.error("parse message to json return null:"+ message);
-            return null;
-        }
+    AcsRequest makeRequest(BaseMobileMessage baseMobileMessage, int pushType) {
         if (pushType == AppPropertyKeyConst.PUSH_TYPE_NOTICE) {
             PushNoticeToAndroidRequest androidRequest = new PushNoticeToAndroidRequest();
             androidRequest.setProtocol(ProtocolType.HTTPS);
