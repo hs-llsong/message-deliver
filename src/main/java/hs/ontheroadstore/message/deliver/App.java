@@ -87,7 +87,7 @@ public class App {
         app.getHandleManager().registerWxMessageMakeupHandler(new WxMessageMakeupHandleImpl(prop));
         app.getHandleManager().registerExecutorServiceHandler(new ProducerExecutorServiceHandlerImpl(app.getHandleManager(),threadPoolSize));
         app.getHandleManager().registerAppMessagePushHandler(new AliAcsMessagePushHandlerImpl(prop));
-
+        app.getHandleManager().registerNoDisturbHandle(new HsWeixinNoDisturbHandleImpl(prop));
         boolean wxAccessTokenReadonly = false;
         String isWxAccessTokenReadonly = prop.getProperty(AppPropertyKeyConst.WX_ACCESS_TOKEN_READONLY_KEY);
         if (!StringUtil.isNullOrEmpty(isWxAccessTokenReadonly)) {

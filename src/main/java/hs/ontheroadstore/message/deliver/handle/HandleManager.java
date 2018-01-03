@@ -12,6 +12,7 @@ public interface HandleManager {
     AliOnsProducerHandler getAliOnsProducerHandler();
     ProducerExecutorServiceHandler getExecutorServiceHandler();
     AppMessagePushHandler getAppMessagePushHandler();
+    NoDisturbHandle getNoDisturbHandler();
     void registerWxTemplateMessageHandler(WxTemplateMessageHandler handler);
     void registerWxTokenHandler(WxTokenHandler handler);
     void registerWxMessageMakeupHandler(WxMessageMakeupHandle handle);
@@ -20,4 +21,5 @@ public interface HandleManager {
     void registerAliOnsProducerHandler(AliOnsProducerHandler handler);
     void registerExecutorServiceHandler(ProducerExecutorServiceHandler handler);
     void registerAppMessagePushHandler(AppMessagePushHandler handler);
+    void registerNoDisturbHandle(NoDisturbHandle handle);
 }

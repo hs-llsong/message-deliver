@@ -30,9 +30,14 @@ public class AppPropertyKeyConst {
     public final static String AMS_REGION_KEY = "AMSRegion";
     public final static String AMS_APPKEY_KEY =  "AMSAppkey";
     public final static String AMS_APNSENV_KEY = "AMSApnsEnv";
+    public final static String STYLE_UPDATE = "UPDATE";
     public final static int DEVICE_IOS = 1;
     public final static int DEVICE_ANDROID = 2;
     public final static int PUSH_TYPE_NOTICE = 1;
     public final static int PUSH_TYPE_MESSAGE = 2;
+    public final static String DB_HOST_KEY = "DbHost";
+    public final static String DB_NAME_KEY = "DbName";
+    public final static String DB_USER_KEY = "DbUser";
+    public final static String DB_PASSWORD_KEY = "DbPassword";
 
 }

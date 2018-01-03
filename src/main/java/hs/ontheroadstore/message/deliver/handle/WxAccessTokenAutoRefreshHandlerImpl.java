@@ -26,7 +26,7 @@ public class WxAccessTokenAutoRefreshHandlerImpl implements WxTokenAutoRefreshHa
     private HsHttpClient hsHttpClient;
     private boolean refreshTokenImmediately = false;
     private int lastRefreshTime = 0;
-    private int refreshFrozeTime = 5*60;  // 5 minutes
+    private final int refreshFrozeTime = 5*60;  // 5 minutes
     private volatile boolean stop = false;
     private JedisPoolHandler jedisPoolHandler;
     private String redisTokenKey;

@@ -12,6 +12,7 @@ import hs.ontheroadstore.message.deliver.bean.AppPropertyKeyConst;
 import hs.ontheroadstore.message.deliver.bean.WeixinMessageTemplate;
 import hs.ontheroadstore.message.deliver.bean.WxTemplateMessage;
 import hs.ontheroadstore.message.deliver.bean.WxTemplateMessageResponse;
+import hs.ontheroadstore.message.deliver.handle.NoDisturbHandle;
 import hs.ontheroadstore.message.deliver.handle.WxTokenAutoRefreshHandler;
 import hs.ontheroadstore.message.deliver.handle.WxTokenHandler;
 import org.apache.log4j.Logger;
@@ -104,13 +105,20 @@ public class DeliverListener implements MessageListener{
             logger.error("WxAccessToken is null.");
             return Action.ReconsumeLater;
         }
-
+        boolean isPushMessage = false;
         WeixinMessageTemplate weixinMessageTemplate;
         try {
             WxTemplateMessage wxTemplateMessage = new Gson().fromJson(message, WxTemplateMessage.class);
             if(wxTemplateMessage == null) {
                 logger.error("WxTemplateMessage is null.message style error!" + message);
                 return Action.CommitMessage;
+            }
+            if (StringUtil.isNullOrEmpty(wxTemplateMessage.getToUser())) {
+                logger.error("To user openid is null." + message);
+                return Action.CommitMessage;
+            }
+            if(wxTemplateMessage.getStyleName().equals(AppPropertyKeyConst.STYLE_UPDATE)) {
+                isPushMessage = true;
             }
             weixinMessageTemplate = app.getHandleManager().getWxMessageMakeupHandler().disguise(wxTemplateMessage);
 
@@ -126,7 +134,6 @@ public class DeliverListener implements MessageListener{
             return Action.CommitMessage;
         }
 
-
         WxTemplateMessageResponse wxTemplateMessageResponse =
                     app.getHandleManager().getWxTemplateMessageHandler().send(weixinMessageTemplate,accessToken);
         if (wxTemplateMessageResponse == null) {
@@ -137,8 +144,14 @@ public class DeliverListener implements MessageListener{
             logger.error("Error code:" + wxTemplateMessageResponse.getErrcode());
             switch (wxTemplateMessageResponse.getErrcode()) {
                 case 43004:
+                    //{"errcode":43004,"errmsg":"require subscribe hint: [zgtDpA0256ge29]"}
+                    if (isPushMessage) {
+                        NoDisturbHandle noDisturbHandle = app.getHandleManager().getNoDisturbHandler();
+                        if (noDisturbHandle != null) noDisturbHandle.pacify(weixinMessageTemplate.getToUser());
+                    }
                     break;
                 case 43019:
+                    //{"errcode":43019,"errmsg":"require remove blacklist hint: [lU_240184ge30]"}
                     break;
                 case 40037:
                     logger.error("Reconsume later.Send message failed." + wxTemplateMessageResponse.getErrmsg());
@@ -148,10 +161,9 @@ public class DeliverListener implements MessageListener{
                     if(handler instanceof WxTokenAutoRefreshHandler) {
                         ((WxTokenAutoRefreshHandler) handler).refreshToken();
                     }
-                    //app.getHandleManager().getWxTokenHandler().
-                    logger.error("Reconsume later.Send message 40001 error." + wxTemplateMessageResponse.getErrmsg());
                     return Action.ReconsumeLater;
                 case 40003: //invalid openid hint
+                    //{"errcode":40003,"errmsg":"invalid openid hint: [iozOma0197ge30]"}
                     break;
                 default:
                     break;

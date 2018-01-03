@@ -6,7 +6,7 @@
 
     <groupId>hs.ontheroadstore</groupId>
     <artifactId>message_deliver</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
     <name>message-deliver</name>
     <url>http://maven.apache.org</url>
     <properties>
@@ -66,6 +66,21 @@
             <groupId>com.aliyun</groupId>
             <artifactId>aliyun-java-sdk-core</artifactId>
             <version>3.2.5</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.38</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codejargon</groupId>
+            <artifactId>fluentjdbc</artifactId>
+            <version>1.8.3</version>
         </dependency>
     </dependencies>
     <build>
