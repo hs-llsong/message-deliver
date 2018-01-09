@@ -152,6 +152,10 @@ public class DeliverListener implements MessageListener{
                     break;
                 case 43019:
                     //{"errcode":43019,"errmsg":"require remove blacklist hint: [lU_240184ge30]"}
+
+                    NoDisturbHandle noDisturbHandle = app.getHandleManager().getNoDisturbHandler();
+                    if (noDisturbHandle != null) noDisturbHandle.pacify(weixinMessageTemplate.getToUser());
+
                     break;
                 case 40037:
                     logger.error("Reconsume later.Send message failed." + wxTemplateMessageResponse.getErrmsg());

@@ -32,7 +32,7 @@ public class App {
     public static void main( String[] args ){
         App app = new App();
         Properties prop = app.loadPropertis();
-        if(prop == null) {
+        if (prop == null) {
             System.out.println("Load properties failed.");
             System.exit(0);
         }
