@@ -14,6 +14,7 @@ public class HandleManagerImpl implements HandleManager {
     private AliOnsProducerHandler aliOnsProducerHandler;
     private ProducerExecutorServiceHandler executorServiceHandler;
     private AppMessagePushHandler appMessagePushHandler;
+    private NoDisturbHandle noDisturbHandle;
     @Override
     public AliOnsProducerHandler getAliOnsProducerHandler() {
         return this.aliOnsProducerHandler;
@@ -83,5 +84,15 @@ public class HandleManagerImpl implements HandleManager {
     @Override
     public void registerAppMessagePushHandler(AppMessagePushHandler appMessagePushHandler) {
         this.appMessagePushHandler = appMessagePushHandler;
+    }
+
+    @Override
+    public NoDisturbHandle getNoDisturbHandler() {
+        return this.noDisturbHandle;
+    }
+
+    @Override
+    public void registerNoDisturbHandle(NoDisturbHandle handle) {
+        this.noDisturbHandle = handle;
     }
 }
