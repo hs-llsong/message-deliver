@@ -8,4 +8,5 @@ import hs.ontheroadstore.message.deliver.bean.WxTemplateMessageResponse;
  */
 public interface WxTemplateMessageHandler {
     WxTemplateMessageResponse send(WeixinMessageTemplate message, String accessToken);
+    WxTemplateMessageResponse send(String message,String accessToken);
 }

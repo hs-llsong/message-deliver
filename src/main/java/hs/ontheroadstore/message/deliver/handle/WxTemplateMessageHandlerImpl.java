@@ -22,10 +22,15 @@ public class WxTemplateMessageHandlerImpl implements WxTemplateMessageHandler {
     public WxTemplateMessageResponse send(WeixinMessageTemplate message, String accessToken) {
         Gson gson = new GsonBuilder().create();
         String jsonBody = gson.toJson(message);
-        logger.debug("Request json body:" + jsonBody);
+        return send(jsonBody,accessToken);
+    }
+
+    @Override
+    public WxTemplateMessageResponse send(String message, String accessToken) {
+        logger.debug("Request json body:" + message);
         String responseBody;
         try {
-            responseBody = hsHttpClient.postJson(WEIXIN_TEMPLATE_MESSAGE_URL + accessToken,jsonBody);
+            responseBody = hsHttpClient.postJson(WEIXIN_TEMPLATE_MESSAGE_URL + accessToken,message);
         } catch (IOException e) {
             logger.error(e.getMessage());
             return null;
@@ -40,7 +45,7 @@ public class WxTemplateMessageHandlerImpl implements WxTemplateMessageHandler {
         logger.debug("Response body:" + responseBody);
         WxTemplateMessageResponse response;
         try {
-            response = gson.fromJson(responseBody,WxTemplateMessageResponse.class);
+            response = new Gson().fromJson(responseBody,WxTemplateMessageResponse.class);
         } catch (JsonSyntaxException e) {
             logger.error(e.getMessage());
             return null;
