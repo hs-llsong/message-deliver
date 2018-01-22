@@ -53,6 +53,8 @@ public class DeliverListener implements MessageListener{
                 return doAndroidMessage(msgData,message.getKey());
             case AppPropertyKeyConst.MSG_TAG_WX_APP:
                 return doWxAppMessage(msgData);
+            case AppPropertyKeyConst.MSG_TAG_NEW_WEIXIN:
+                return doNewWxTemplateMessage(msgData);
             default:
                 return doWxTemplateMessage(msgData);
         }
@@ -82,24 +84,80 @@ public class DeliverListener implements MessageListener{
         logger.info("doWxAppMessage:" + message);
         return Action.CommitMessage;
     }
-    private Action doWxTemplateMessage(String message) {
 
+    private boolean checkEnv() {
         if(app.getHandleManager() == null) {
             logger.error("Handler manager is null.");
-            return Action.ReconsumeLater;
+            return false;
         }
         if (app.getHandleManager().getWxTemplateMessageHandler()== null) {
             logger.error("WxTemplateMessageHandler is null.");
-            return Action.ReconsumeLater;
+            return false;
         }
         if (app.getHandleManager().getWxTokenHandler()== null) {
             logger.error("WxTokenHandler is null.");
-            return Action.ReconsumeLater;
+            return false;
         }
         if (app.getHandleManager().getWxMessageMakeupHandler() == null) {
             logger.error("WxMessageMakeupHandle is null.");
+            return false;
+        }
+        return true;
+    }
+    private Action doNewWxTemplateMessage(String message) {
+        if(!checkEnv()) return Action.ReconsumeLater;
+        String accessToken = app.getHandleManager().getWxTokenHandler().getAccessToken();
+        if (StringUtil.isNullOrEmpty(accessToken)) {
+            logger.error("WxAccessToken is null.");
             return Action.ReconsumeLater;
         }
+        WxTemplateMessageResponse wxTemplateMessageResponse =
+                app.getHandleManager().getWxTemplateMessageHandler().send(message,accessToken);
+        if (wxTemplateMessageResponse == null) {
+            logger.info("Send template message response null,consume later.");
+            return Action.ReconsumeLater;
+        }
+        if (wxTemplateMessageResponse.getErrcode()!=0) {
+            logger.error("Error code:" + wxTemplateMessageResponse.getErrcode());
+            switch (wxTemplateMessageResponse.getErrcode()) {
+                case 43004:
+                    //{"errcode":43004,"errmsg":"require subscribe hint: [zgtDpA0256ge29]"}
+                    doNoDisturbeAction(message);
+                    break;
+                case 43019:
+                    //{"errcode":43019,"errmsg":"require remove blacklist hint: [lU_240184ge30]"}
+                    doNoDisturbeAction(message);
+                    break;
+                case 40037:
+                    logger.error("Consume later.Send message failed." + wxTemplateMessageResponse.getErrmsg());
+                    return Action.ReconsumeLater;
+                case 40001:
+                    WxTokenHandler handler = app.getHandleManager().getWxTokenHandler();
+                    if(handler instanceof WxTokenAutoRefreshHandler) {
+                        ((WxTokenAutoRefreshHandler) handler).refreshToken();
+                    }
+                    return Action.ReconsumeLater;
+                case 40003: //invalid openid hint
+                    //{"errcode":40003,"errmsg":"invalid openid hint: [iozOma0197ge30]"}
+                    break;
+                default:
+                    break;
+            }
+        }
+        return Action.CommitMessage;
+    }
+    private void doNoDisturbeAction(String message){
+        NoDisturbHandle noDisturbHandle = app.getHandleManager().getNoDisturbHandler();
+        if(noDisturbHandle == null) return;
+        WeixinMessageTemplate weixinMessageTemplate = new Gson().fromJson(message,WeixinMessageTemplate.class);
+        if(weixinMessageTemplate == null) return;
+        if(StringUtil.isNullOrEmpty(weixinMessageTemplate.getToUser())) return;
+        noDisturbHandle.pacify(weixinMessageTemplate.getToUser());
+    }
+
+    private Action doWxTemplateMessage(String message) {
+
+        if(!checkEnv()) return Action.ReconsumeLater;
         String accessToken = app.getHandleManager().getWxTokenHandler().getAccessToken();
         if (StringUtil.isNullOrEmpty(accessToken)) {
             logger.error("WxAccessToken is null.");

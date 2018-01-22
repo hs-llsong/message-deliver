@@ -27,6 +27,7 @@ public class AppPropertyKeyConst {
     public final static String MSG_TAG_IOS = "iosapp";
     public final static String MSG_TAG_android = "androidapp";
     public final static String MSG_TAG_WX_APP = "weixinapp"; //微信小程序
+    public final static String MSG_TAG_NEW_WEIXIN = "newwx";
     public final static String AMS_REGION_KEY = "AMSRegion";
     public final static String AMS_APPKEY_KEY =  "AMSAppkey";
     public final static String AMS_APNSENV_KEY = "AMSApnsEnv";
