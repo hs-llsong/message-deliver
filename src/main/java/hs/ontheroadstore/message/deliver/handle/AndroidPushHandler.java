@@ -22,7 +22,18 @@ public class AndroidPushHandler extends MobilePushHandler{
 
     @Override
     AcsRequest makeRequest(BaseMobileMessage baseMobileMessage, int pushType) {
-        if (pushType == AppPropertyKeyConst.PUSH_TYPE_NOTICE) {
+        if (pushType == AppPropertyKeyConst.PUSH_TYPE_MESSAGE){
+            PushMessageToAndroidRequest androidRequest = new PushMessageToAndroidRequest();
+            androidRequest.setProtocol(ProtocolType.HTTPS);
+            androidRequest.setMethod(MethodType.POST);
+            androidRequest.setAppKey(getAppkey());
+            androidRequest.setTarget(baseMobileMessage.getTarget());
+            androidRequest.setTargetValue(baseMobileMessage.getTargetValue());
+            androidRequest.setTitle(baseMobileMessage.getTitle());
+            androidRequest.setBody(baseMobileMessage.getBody());
+            return androidRequest;
+        } else {
+            //android default is notice message
             PushNoticeToAndroidRequest androidRequest = new PushNoticeToAndroidRequest();
             androidRequest.setProtocol(ProtocolType.HTTPS);
             androidRequest.setMethod(MethodType.POST);
@@ -32,16 +43,6 @@ public class AndroidPushHandler extends MobilePushHandler{
             androidRequest.setTitle(baseMobileMessage.getTitle());
             androidRequest.setBody(baseMobileMessage.getBody());
             androidRequest.setExtParameters(baseMobileMessage.getExtParameters());
-            return androidRequest;
-        } else {
-            PushMessageToAndroidRequest androidRequest = new PushMessageToAndroidRequest();
-            androidRequest.setProtocol(ProtocolType.HTTPS);
-            androidRequest.setMethod(MethodType.POST);
-            androidRequest.setAppKey(getAppkey());
-            androidRequest.setTarget(baseMobileMessage.getTarget());
-            androidRequest.setTargetValue(baseMobileMessage.getTargetValue());
-            androidRequest.setTitle(baseMobileMessage.getTitle());
-            androidRequest.setBody(baseMobileMessage.getBody());
             return androidRequest;
         }
 
