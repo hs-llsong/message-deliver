@@ -6,6 +6,7 @@ import com.aliyuncs.http.MethodType;
 import com.aliyuncs.http.ProtocolType;
 import com.aliyuncs.push.model.v20160801.PushMessageToiOSRequest;
 import com.aliyuncs.push.model.v20160801.PushNoticeToiOSRequest;
+import com.aliyuncs.push.model.v20160801.PushRequest;
 import com.google.gson.Gson;
 import hs.ontheroadstore.message.deliver.bean.AppPropertyKeyConst;
 import hs.ontheroadstore.message.deliver.bean.BaseMobileMessage;
@@ -35,9 +36,10 @@ public class IosPushHandler extends MobilePushHandler{
                 iosRequest.setTarget(baseMobileMessage.getTarget());
                 iosRequest.setTargetValue(baseMobileMessage.getTargetValue());
                 iosRequest.setBody(baseMobileMessage.getBody());
+
                 iosRequest.setExtParameters(baseMobileMessage.getExtParameters());
                 return iosRequest;
-            } else {
+            } else if(pushType == AppPropertyKeyConst.PUSH_TYPE_MESSAGE){
                 PushMessageToiOSRequest iosRequest = new PushMessageToiOSRequest();
                 iosRequest.setProtocol(ProtocolType.HTTPS);
                 iosRequest.setMethod(MethodType.POST);
@@ -47,6 +49,23 @@ public class IosPushHandler extends MobilePushHandler{
                 iosRequest.setTitle(baseMobileMessage.getTitle());
                 iosRequest.setBody(baseMobileMessage.getBody());
                 return iosRequest;
+            } else {
+                PushRequest pushRequest = new PushRequest();
+                pushRequest.setProtocol(ProtocolType.HTTPS);
+                pushRequest.setAppKey(getAppkey());
+                pushRequest.setTarget(baseMobileMessage.getTarget());
+                pushRequest.setTargetValue(baseMobileMessage.getTargetValue());
+                pushRequest.setPushType("NOTICE");
+                pushRequest.setTitle(baseMobileMessage.getTitle());
+                pushRequest.setBody(baseMobileMessage.getBody());
+
+                pushRequest.setIOSBadgeAutoIncrement(true);
+                pushRequest.setIOSApnsEnv(this.apnsEnv);
+                pushRequest.setIOSExtParameters(baseMobileMessage.getExtParameters());
+                pushRequest.setDeviceType("iOS");
+                return pushRequest;
+                //pushRequest.setIOSRemind(true); // 消息推送时设备不在线（既与移动推送的服务端的长连接通道不通），则这条推送会做为通知，通过苹果的APNs通道送达一次。注意：离线消息转通知仅适用于生产环境
+                //pushRequest.setIOSRemindBody("iOSRemindBody");//iOS消息转通知时使用的iOS通知内容，仅当iOSApnsEnv=PRODUCT && iOSRemind为true时有效
             }
 
         } catch (Exception e) {

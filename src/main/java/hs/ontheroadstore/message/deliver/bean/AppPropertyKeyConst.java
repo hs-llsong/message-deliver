@@ -36,6 +36,7 @@ public class AppPropertyKeyConst {
     public final static int DEVICE_ANDROID = 2;
     public final static int PUSH_TYPE_NOTICE = 1;
     public final static int PUSH_TYPE_MESSAGE = 2;
+    public final static int PUSH_TYPE_ADVANCE = 3;
     public final static String DB_HOST_KEY = "DbHost";
     public final static String DB_NAME_KEY = "DbName";
     public final static String DB_USER_KEY = "DbUser";
