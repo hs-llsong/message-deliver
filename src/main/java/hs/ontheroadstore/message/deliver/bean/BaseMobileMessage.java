@@ -10,7 +10,25 @@ public class BaseMobileMessage implements Serializable{
     private String targetValue;
     private String title;
     private String body;
+    private String androidOpenType;
+    private String androidOpenTarget;
     private String extParameters;
+
+    public String getAndroidOpenType() {
+        return androidOpenType;
+    }
+
+    public void setAndroidOpenType(String androidOpenType) {
+        this.androidOpenType = androidOpenType;
+    }
+
+    public String getAndroidOpenTarget() {
+        return androidOpenTarget;
+    }
+
+    public void setAndroidOpenTarget(String androidOpenTarget) {
+        this.androidOpenTarget = androidOpenTarget;
+    }
 
     public String getTarget() {
         return target;
@@ -51,4 +69,5 @@ public class BaseMobileMessage implements Serializable{
     public void setExtParameters(String extParameters) {
         this.extParameters = extParameters;
     }
+
 }

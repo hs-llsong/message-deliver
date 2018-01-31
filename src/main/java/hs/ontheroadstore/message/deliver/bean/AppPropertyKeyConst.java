@@ -42,4 +42,8 @@ public class AppPropertyKeyConst {
     public final static String DB_USER_KEY = "DbUser";
     public final static String DB_PASSWORD_KEY = "DbPassword";
 
+    public final static String ANDROID_OPEN_TYPE_NONE = "NONE";
+    public final static String ANDROID_OPEN_TYPE_ACTIVITY = "ACTIVITY";
+    public final static String ANDROID_OPEN_TYPE_APPLICATION = "APPLICATION";
+    public final static String ANDROID_OPEN_TYPE_URL = "URL";
 }
