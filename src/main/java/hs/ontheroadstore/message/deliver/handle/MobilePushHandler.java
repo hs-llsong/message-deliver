@@ -53,7 +53,7 @@ public abstract class MobilePushHandler {
             return true;
         }catch (Exception e) {
             logger.error("Push message to mobile device error:" + e.getMessage());
-            return false;
+            return true;
         }
     }
 
