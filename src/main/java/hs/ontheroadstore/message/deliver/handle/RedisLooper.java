@@ -28,6 +28,7 @@ public class RedisLooper implements Runnable{
         while (!stop) {
             String message;
             message = cacheHandler.poll();
+            logger.debug("received message: " + message);
             if (StringUtil.isNullOrEmpty(message)) {
                 try{
                     Thread.sleep(200);
